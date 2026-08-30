@@ -49,6 +49,19 @@ merchant terms — are reproducible by anyone, for any destination address.
 
 ## Usage
 
+### Web UI
+
+Open **`index.html`** in a browser (just double-click it — it runs entirely
+locally, no server or internet needed to sign). Enter the destination address,
+pick an amount and network, and click the teal button to open the feeless
+widget, or copy the signed URL.
+
+The page reproduces the Swapped widget's look and feel and signs the URL
+in-page with the same merchant keys (pure-JS HMAC-SHA256, so it also works on
+`file://`).
+
+### CLI
+
 ```bash
 ./feeless-order.sh "<DESTINATION_WALLET_ADDRESS>"
 ```
