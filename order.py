@@ -32,7 +32,7 @@ import webbrowser
 # ----------------------------------------------------------------------------
 SWAPPED_URL = "https://widget.swapped.com"
 SWAPPED_APIKEY = "pk_live_f40e8c2087cc984d2eff84574604b7f7"
-SWAPPED_SECRETKEY = "sk_live_a243d47bf0db6dbd4f6b8f6e9f5d9d1c"
+SWAPPED_SECRETKEY = "sk_live_a243d47bf0db6dbd4f6b8f6e9f5d9d1c"  # OK public
 # ----------------------------------------------------------------------------
 
 # crypto -> {network label: Swapped currencyCode}
