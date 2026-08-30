@@ -91,9 +91,46 @@ Mix and match: give it only `--token` and it asks for the wallet. Give it neithe
 | `--token=<code>` | asks you | Which coin, and which chain it lands on |
 | `--address=<addr>` | asks you | Where your coins go |
 | `--amount=<n>` | `100` | How many dollars to start the quote at |
+| `-y`, `--yes` | asks you | Skip the warning prompt |
 | `-h`, `--help` | — | Show help |
 
 You can change the amount inside the buy box before you pay, so `--amount` is only a starting number.
+
+## It warns you every time
+
+Before it makes any link, the tool stops and asks:
+
+```
+Warning: this tool signs an order with Hyperliquid's merchant
+keys, on terms Hyperliquid did not extend to you. Doing so may
+breach the terms of service of swapped.com, of Hyperliquid, or of
+both.
+
+swapped.com can tell these orders apart from ones the Hyperliquid
+app made. Orders may be flagged, held, reversed or refused, and
+accounts may be closed. Placing the order means handing swapped.com
+your payment details and your identity documents.
+
+You alone are responsible for any consequences of using this tool.
+
+Continue? (y/N):
+```
+
+Say no and it quits. Say yes and it carries on. `--yes` skips the question.
+
+Whatever happens next is on you.
+
+### Non-HyperCore pairs get an extra line
+
+Inside the Hyperliquid app, the only thing you can buy is **USDC on HyperCore**. That is the one order its 0% deal was ever meant to make.
+
+So an order for any other coin or chain is plainly not something the Hyperliquid app could have made. The warning says so:
+
+```
+Hyperliquid only ever sells USDC on HyperCore (USDC_HYPERCORE). An
+order for usdc_polygon is one its app could not have produced at all,
+which makes this order especially easy to single out.
+```
 
 ## Other chains
 

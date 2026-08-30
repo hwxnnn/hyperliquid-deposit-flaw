@@ -18,6 +18,7 @@ Options:
     --token=<code>    Swapped currencyCode, e.g. usdc_polygon, USDC_HYPERCORE
     --address=<addr>  destination wallet address
     --amount=<n>      starting quote amount in USD (default: 100)
+    -y, --yes         skip the confirmation prompt
     -h, --help        show this help
 
 Anything not passed as a flag is prompted for.
@@ -30,6 +31,7 @@ WebCrypto. Requires only the Python 3 standard library.
 import base64
 import hmac
 import hashlib
+import os
 import re
 import sys
 import urllib.parse
@@ -45,6 +47,11 @@ SWAPPED_SECRETKEY = "sk_live_a243d47bf0db6dbd4f6b8f6e9f5d9d1c"  # OK public
 
 # Starting quote amount. The widget lets you change it before paying.
 DEFAULT_AMOUNT = "100"
+
+# The only pair the Hyperliquid app itself can ever produce. Every other pair
+# is visibly not something the merchant integration would have generated, and
+# draws an extra line in the warning.
+NATIVE_CURRENCY_CODE = "USDC_HYPERCORE"
 # ----------------------------------------------------------------------------
 
 # token -> {network label: Swapped currencyCode}
@@ -164,6 +171,9 @@ def parse_args(argv: list[str]) -> dict[str, str]:
         if arg in ("-h", "--help"):
             print(__doc__.strip())
             sys.exit(0)
+        if arg in ("-y", "--yes"):
+            opts["yes"] = "1"
+            continue
         match = re.fullmatch(r"--(token|address|amount)=(.*)", arg)
         if not match:
             sys.exit(f"order.py: unrecognized argument: {arg}\n"
@@ -185,11 +195,64 @@ def select_currency_code() -> str:
     return networks[labels[choose("Select network:", labels)]]
 
 
+YELLOW = "\033[33m"
+RESET = "\033[0m"
+
+
+def warn(message: str) -> None:
+    """Print a yellow warning to stderr, plain if the terminal can't colour."""
+    colour = sys.stderr.isatty() and not os.environ.get("NO_COLOR")
+    prefix, suffix = (YELLOW, RESET) if colour else ("", "")
+    print(f"{prefix}{message}{suffix}", file=sys.stderr)
+
+
+def confirm_order(currency_code: str, assume_yes: bool) -> bool:
+    """Show the standing warning and ask to continue. False means quit.
+
+    Shown for every order, whatever the pair. Declining is the default.
+    """
+    message = (
+        "\nWarning: this tool signs an order with Hyperliquid's merchant\n"
+        "keys, on terms Hyperliquid did not extend to you. Doing so may\n"
+        "breach the terms of service of swapped.com, of Hyperliquid, or of\n"
+        "both.\n\n"
+        "swapped.com can tell these orders apart from ones the Hyperliquid\n"
+        "app made. Orders may be flagged, held, reversed or refused, and\n"
+        "accounts may be closed. Placing the order means handing swapped.com\n"
+        "your payment details and your identity documents.\n"
+    )
+
+    if currency_code != NATIVE_CURRENCY_CODE:
+        message += (
+            f"\nHyperliquid only ever sells USDC on HyperCore "
+            f"({NATIVE_CURRENCY_CODE}). An\n"
+            f"order for {currency_code} is one its app could not have "
+            f"produced at all,\n"
+            f"which makes this order especially easy to single out.\n"
+        )
+
+    message += ("\nYou alone are responsible for any consequences of using "
+                "this tool.")
+    warn(message)
+
+    if assume_yes:
+        return True
+    if not sys.stdin.isatty():
+        print("Cannot ask for confirmation here. Pass --yes to proceed.",
+              file=sys.stderr)
+        return False
+    return input("\nContinue? (y/N): ").strip().lower() in ("y", "yes")
+
+
 def main(argv: list[str]) -> int:
     opts = parse_args(argv)
 
     currency_code = (canonical_code(opts["token"]) if "token" in opts
                      else select_currency_code())
+
+    if not confirm_order(currency_code, "yes" in opts):
+        print("Aborted.", file=sys.stderr)
+        return 1
 
     if "address" in opts:
         address = opts["address"]
