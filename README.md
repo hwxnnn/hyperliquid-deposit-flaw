@@ -42,25 +42,45 @@ base64( HMAC-SHA256( secretKey, "?" + query-string ) )
 i.e. an HMAC-SHA256 over the URL's search string (leading `?` included,
 parameters in the order above), base64-encoded, then URL-encoded — exactly what
 the Hyperliquid app computes in the browser with WebCrypto. This tool performs
-the same computation with `openssl`.
+the same computation in Python.
 
 Since the signing key is public, the signature — and therefore the feeless
 merchant terms — are reproducible by anyone, for any destination address.
 
 ## Usage
 
-### Web UI
+### Interactive (Python)
 
-Open **`index.html`** in a browser (just double-click it — it runs entirely
-locally, no server or internet needed to sign). Enter the destination address,
-pick an amount and network, and click the teal button to open the feeless
-widget, or copy the signed URL.
+```bash
+python3 feeless-order.py
+```
 
-The page reproduces the Swapped widget's look and feel and signs the URL
-in-page with the same merchant keys (pure-JS HMAC-SHA256, so it also works on
-`file://`).
+Walks you through picking the crypto and network, the amount, and the
+destination address (with per-network address sanity checks), then prints the
+signed URL and offers to open it in your browser:
 
-### CLI
+```
+Select crypto:
+  1) USDC
+  2) USDT
+  3) Other (custom Swapped currencyCode)
+Choice [1]: 1
+Select USDC network:
+  1) HyperCore (Hyperliquid)  (USDC_HYPERCORE)
+  ...
+Amount to spend (USD) [100]: 250
+Destination wallet address: 0x1234...
+
+Signed widget URL:
+  https://widget.swapped.com/?apiKey=...&currencyCode=USDC_HYPERCORE&quoteCurrencyAmount=250&walletAddress=0x1234...&signature=...
+
+Open in browser now? (y/N):
+```
+
+Runs anywhere with Python 3 — standard library only, no account or network
+access needed to sign.
+
+### One-liner (bash)
 
 ```bash
 ./feeless-order.sh "<DESTINATION_WALLET_ADDRESS>"
@@ -117,7 +137,8 @@ for the full code list.
 
 ## Requirements
 
-- `bash`, `openssl`, `base64` (all standard on macOS/Linux)
+- `feeless-order.py`: Python 3 (standard library only)
+- `feeless-order.sh`: `bash`, `openssl`, `base64`
 - No network access, account, or authentication needed to generate the URL
 
 ## Verification
