@@ -4,9 +4,9 @@ Buy crypto with a card and pay **0% card fee**. Pay 100 USD, get 100 USDC.
 
 ## What this is
 
-[Swapped.com](https://swapped.com) sells crypto for card money. Normally they take about **1.75%** from you.
+Normally, a [swapped.com](https://swapped.com) order through their website charges **1.75%** from you per order.
 
-Hyperliquid has a deal with Swapped. Inside the Hyperliquid app, the same buy box charges **0%**. Better rate too.
+Hyperliquid has a deal with swapped.com. Inside the Hyperliquid app, the same buy box charges **0%**. Better rate too.
 
 That deal is not locked to Hyperliquid. This tool makes the same 0% buy box link, but sent to **any wallet you want**, for **any amount**.
 
@@ -14,15 +14,15 @@ You do not need a Hyperliquid account. You do not need to log in.
 
 ## What it does
 
-You run it. It prints a link. You open the link. Swapped's buy box loads with 0% card fee, your amount, your wallet.
+You run it. It prints a link. You open the link. swapped.com's buy box loads with 0% card fee, your amount, your wallet.
 
-Swapped handles the rest: your card, your ID check, sending you the coins. This tool never touches your money.
+swapped.com handles the rest: your card, your ID check, sending you the coins. This tool never touches your info (other than the destination wallet address).
 
 ## Why it works
 
-The Hyperliquid app builds that link in your own browser. To prove the link is real, it stamps it with a secret code.
+The Hyperliquid app builds that link in your own browser. To prove the link is real, it stamps it with a secret key.
 
-But Hyperliquid ships that secret code to everybody. It sits in the app's public files (`app.hyperliquid.xyz/assets/config-*.js`):
+But Hyperliquid ships that secret key to everybody. It sits in the app's public files (`app.hyperliquid.xyz/assets/config-*.js`):
 
 ```js
 {
@@ -33,7 +33,7 @@ But Hyperliquid ships that secret code to everybody. It sits in the app's public
 }
 ```
 
-Anyone with that code can make the same stamp. So anyone can make the same 0% link.
+Anyone with that key can make the same stamp. So anyone can make the same 0% link.
 
 The stamp is made like this:
 
@@ -41,7 +41,7 @@ The stamp is made like this:
 base64( HMAC-SHA256( secretKey, "?" + query-string ) )
 ```
 
-Same math the Hyperliquid app does. This tool does it too.
+Same math the Hyperliquid app does.
 
 ## How to use it
 
@@ -129,4 +129,3 @@ The stamps match exactly. Same link, same terms.
 - The stamp covers the whole link. Hand-edit the wallet or the amount and Swapped rejects it, then falls back to the normal fee. This tool re-stamps properly, so its links work.
 - The keys above are not stolen. Hyperliquid hands them to every visitor. If they ever change them, grab the new ones from the `config-*.js` file and paste them at the top of `order.py`.
 - This tool only makes links. It does not take payments, hold your coins, or touch Hyperliquid.
-
